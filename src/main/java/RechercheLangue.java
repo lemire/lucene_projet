@@ -35,7 +35,7 @@ public class RechercheLangue {
         try (var reader = new BufferedReader(
                 new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
             // Récupération de la langue
-            var language = getLanguage(args);
+            var language = getLanguage(args, reader);
             System.out.println("Recherche avec analyseur pour la langue : " + language);
 
             // Configuration de l'analyseur et du parser
@@ -64,33 +64,33 @@ public class RechercheLangue {
      * Détermine la langue à utiliser, via les arguments ou un menu interactif.
      *
      * @param args Arguments de la ligne de commande
+     * @param reader Lecteur de l'entrée standard. Il ne faut pas le fermer ici :
+     *               fermer le lecteur fermerait aussi System.in.
      * @return "fr" pour français, "en" pour anglais, ou "default" pour l'analyseur standard
      * @throws Exception En cas d'erreur de lecture de l'entrée
      */
-    private static String getLanguage(String[] args) throws Exception {
+    private static String getLanguage(String[] args, BufferedReader reader) throws Exception {
         for (var arg : args) {
             if (arg.startsWith("--lang=")) {
                 var lang = arg.substring("--lang=".length()).toLowerCase();
-                if (lang.equals("fr") || lang.equals("en")) {
+                if (lang.equals("fr") || lang.equals("en") || lang.equals("default")) {
                     return lang;
                 }
             }
         }
 
-        try (var reader = new BufferedReader(
-                new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
-            System.out.println("Aucune langue spécifiée. Choisissez une langue pour l'analyseur :");
-            System.out.println("  - fr : Français (FrenchAnalyzer)");
-            System.out.println("  - en : Anglais (EnglishAnalyzer)");
-            System.out.println("  - default : Standard (StandardAnalyzer)");
-            System.out.print("Entrez votre choix (fr/en/default) : ");
-            var lang = reader.readLine().trim().toLowerCase();
+        System.out.println("Aucune langue spécifiée. Choisissez une langue pour l'analyseur :");
+        System.out.println("  - fr : Français (FrenchAnalyzer)");
+        System.out.println("  - en : Anglais (EnglishAnalyzer)");
+        System.out.println("  - default : Standard (StandardAnalyzer)");
+        System.out.print("Entrez votre choix (fr/en/default) : ");
+        var line = reader.readLine();
+        var lang = (line == null) ? "" : line.trim().toLowerCase();
 
-            if (lang.equals("fr") || lang.equals("en") || lang.equals("default")) {
-                return lang;
-            } else {
-                throw new IllegalArgumentException("Choix de langue invalide : " + lang);
-            }
+        if (lang.equals("fr") || lang.equals("en") || lang.equals("default")) {
+            return lang;
+        } else {
+            throw new IllegalArgumentException("Choix de langue invalide : " + lang);
         }
     }
 

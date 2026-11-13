@@ -274,11 +274,13 @@ Après avoir compilé le projet, vous pouvez exécuter `Ajout` pour créer l'ind
      - Tapez un texte (par exemple, `a b`) et appuyez sur Entrée pour voir les résultats.
      - Exemple de sortie :
        ```
-       Résultats : 3 documents trouvés pour "a b"
+       Résultats : 4 documents trouvés pour "a b"
        ID: Doc1 - Lucene ID: 0 - Titre: titre1 - Auteur: auteur1
        ID: Doc3 - Lucene ID: 2 - Titre: titre3 - Auteur: auteur3
        ID: Doc5 - Lucene ID: 4 - Titre: titre5 - Auteur: auteur5
+       ID: Doc2 - Lucene ID: 1 - Titre: titre2 - Auteur: auteur2
        ```
+     - Par défaut, les termes de la requête sont reliés par OU : `Doc2`, qui ne contient que `b`, est donc trouvé, mais avec un score plus faible. Pour exiger les deux termes, tapez `+a +b` : vous obtiendrez alors 3 documents (`Doc1`, `Doc3` et `Doc5`).
      - Appuyez sur Entrée sans texte pour quitter.
 
 2. **Vérifiez les erreurs** :
