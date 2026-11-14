@@ -26,7 +26,9 @@ public class AjoutLangue {
     private static final String FIELD_TITRE = "titre";
     private static final String FIELD_AUTEUR = "auteur";
     private static final String FIELD_CONTENU = "contenu";
-    private static final String INDEX_DIR = "./index/";
+    // Préfixe du dossier d'index : chaque langue a son propre index
+    // (./index_fr/, ./index_en/ ou ./index_default/).
+    private static final String INDEX_DIR_PREFIX = "./index_";
 
     // Contenus des documents à indexer
     private static final String[] DOC_CONTENTS = {
@@ -45,7 +47,7 @@ public class AjoutLangue {
             var reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
             var language = getLanguage(args, reader);
             createIndex(language);
-            System.out.println("Index créé avec succès (langue : " + language + ").");
+            System.out.println("Index créé avec succès dans " + INDEX_DIR_PREFIX + language + "/ (langue : " + language + ").");
         } catch (Exception e) {
             System.err.println("Erreur lors de la création de l'index : " + e.getMessage());
         }
@@ -110,9 +112,12 @@ public class AjoutLangue {
     private static void createIndex(String language) throws Exception {
         var analyzer = getAnalyzer(language);
         var config = new IndexWriterConfig(analyzer);
+        // CREATE : l'index est recréé à chaque exécution (sinon, le mode par défaut
+        // CREATE_OR_APPEND ajouterait les documents une seconde fois).
+        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
 
         try (var writer = new IndexWriter(
-                FSDirectory.open(Paths.get(INDEX_DIR)), config)) {
+                FSDirectory.open(Paths.get(INDEX_DIR_PREFIX + language + "/")), config)) {
             for (var i = 1; i < DOC_CONTENTS.length; i++) {
                 var doc = new Document();
                 doc.add(new StringField(FIELD_ID, "Doc" + i, Field.Store.YES));

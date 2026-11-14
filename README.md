@@ -1,8 +1,9 @@
 # Projet de Recherche et Indexation avec Apache Lucene
 
-Ce projet contient deux programmes Java utilisant **Apache Lucene** :
+Ce projet contient quatre programmes Java utilisant **Apache Lucene** :
 - **Ajout.java** : Crée un index Lucene avec des documents prédéfinis.
 - **Recherche.java** : Permet de rechercher des documents dans l'index à partir d'une entrée clavier.
+- **AjoutLangue.java** et **RechercheLangue.java** : Variantes qui permettent de choisir l'analyseur selon la langue (option `--lang=fr`, `--lang=en` ou `--lang=default`).
 
 Ce guide explique comment configurer l'environnement, compiler le projet avec **Maven**, et exécuter les programmes, que ce soit en ligne de commande ou avec un IDE. Il est destiné aux utilisateurs débutants, y compris ceux qui n'ont jamais utilisé Maven ou qui ne sont pas familiers avec les terminaux comme l'invite de commandes (Windows) ou PowerShell. Des instructions spécifiques pour macOS avec **Homebrew** sont incluses. Nous recommandons  d'utiliser **Java 21** pour bénéficier d'une version LTS (Long-Term Support) stable et performante.
 
@@ -160,15 +161,18 @@ lucene-search/
 ├── src/
 │   └── main/
 │       └── java/
+│           ├── Ajout.java
 │           ├── Recherche.java
-│           └── Ajout.java
+│           ├── AjoutLangue.java
+│           └── RechercheLangue.java
 ...
 ```
 
-- `pom.xml` : Fichier de configuration Maven qui définit les dépendances (Lucene 10.0.0) et les instructions de compilation.
-- `Recherche.java` : Programme pour rechercher dans l'index.
-- `Ajout.java` : Programme pour créer l'index.
-- ...
+- `pom.xml` : Fichier de configuration Maven qui définit les dépendances (Lucene 10.2.0) et les instructions de compilation.
+- `Ajout.java` : Programme pour créer l'index dans `./index/`.
+- `Recherche.java` : Programme pour rechercher dans l'index `./index/`.
+- `AjoutLangue.java` : Programme pour créer un index avec un analyseur propre à une langue, dans `./index_fr/`, `./index_en/` ou `./index_default/` selon l'option `--lang`.
+- `RechercheLangue.java` : Programme pour rechercher dans l'index de la langue choisie avec `--lang` (le même analyseur que celui qui a servi à construire l'index).
 
 Si vous n'avez pas encore ces fichiers, assurez-vous qu'ils sont placés comme indiqué. Les fichiers `Recherche.java` et `Ajout.java` doivent être dans `src/main/java/`.
 
@@ -249,6 +253,7 @@ Après avoir compilé le projet, vous pouvez exécuter `Ajout` pour créer l'ind
    - **Résultat** :
      - Si tout fonctionne, vous verrez : `Index créé avec succès.`
      - Un dossier `./index/` sera créé dans le dossier racine, contenant les fichiers de l'index Lucene.
+     - L'index est recréé à chaque exécution (mode `IndexWriterConfig.OpenMode.CREATE`) : relancer `Ajout` remplace l'index existant au lieu d'ajouter les documents une seconde fois.
 
 2. **Vérifiez les erreurs** :
    - Si vous obtenez `Could not find or load main class Ajout`, vérifiez que `target/lucene-search-1.0-SNAPSHOT.jar` existe.
@@ -286,6 +291,17 @@ Après avoir compilé le projet, vous pouvez exécuter `Ajout` pour créer l'ind
 2. **Vérifiez les erreurs** :
    - Si vous obtenez `Directory does not exist`, assurez-vous d'avoir exécuté `Ajout` d'abord pour créer l'index.
    - Si aucune réponse n'apparaît, vérifiez que l'index dans `./index/` contient des données.
+
+### Variantes selon la langue : `AjoutLangue` et `RechercheLangue`
+
+Ces deux programmes s'exécutent comme `Ajout` et `Recherche`, avec l'option `--lang` (`fr`, `en` ou `default`) ; sans cette option, ils demandent la langue au clavier. Chaque langue a son propre index :
+
+```bash
+java --enable-native-access=ALL-UNNAMED -cp "target/lucene-search-1.0-SNAPSHOT.jar:target/libs/*" AjoutLangue --lang=fr       # crée ./index_fr/
+java --enable-native-access=ALL-UNNAMED -cp "target/lucene-search-1.0-SNAPSHOT.jar:target/libs/*" RechercheLangue --lang=fr   # interroge ./index_fr/
+```
+
+Sous Windows, remplacez `:` par `;` dans le chemin de classes. Comme pour `Ajout`, l'index de la langue choisie est recréé à chaque exécution de `AjoutLangue`.
 
 ## Utilisation avec un IDE
 
@@ -342,7 +358,7 @@ Si vous préférez utiliser un environnement graphique, les IDE comme **IntelliJ
 - Débogage facile avec points d'arrêt.
 - Interface graphique pour exécuter et tester.
 
-**Note** : Assurez-vous que JDK 21 is configured in the IDE to match the recommendation.
+**Note** : Assurez-vous que le JDK 21 est configuré dans l'IDE, conformément à la recommandation.
 
 ## Résolution des problèmes courants
 

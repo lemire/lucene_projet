@@ -47,6 +47,9 @@ public class Ajout {
     private static void createIndex() throws Exception {
         var analyzer = new StandardAnalyzer();
         var config = new IndexWriterConfig(analyzer);
+        // CREATE : l'index est recréé à chaque exécution (sinon, le mode par défaut
+        // CREATE_OR_APPEND ajouterait les documents une seconde fois).
+        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
 
         try (var writer = new IndexWriter(
                 FSDirectory.open(Paths.get(INDEX_DIR)), config)) {

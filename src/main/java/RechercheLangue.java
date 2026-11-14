@@ -28,7 +28,9 @@ public class RechercheLangue {
     private static final String FIELD_TITRE = "titre";
     private static final String FIELD_AUTEUR = "auteur";
     private static final String FIELD_CONTENU = "contenu";
-    private static final String INDEX_DIR = "./index/";
+    // Préfixe du dossier d'index : on lit l'index construit par AjoutLangue
+    // avec la même langue (./index_fr/, ./index_en/ ou ./index_default/).
+    private static final String INDEX_DIR_PREFIX = "./index_";
     private static final String[] SEARCH_FIELDS = {FIELD_TITRE, FIELD_AUTEUR, FIELD_CONTENU};
 
     public static void main(String[] args) {
@@ -36,7 +38,8 @@ public class RechercheLangue {
                 new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
             // Récupération de la langue
             var language = getLanguage(args, reader);
-            System.out.println("Recherche avec analyseur pour la langue : " + language);
+            var indexDir = INDEX_DIR_PREFIX + language + "/";
+            System.out.println("Recherche avec analyseur pour la langue : " + language + " (index : " + indexDir + ")");
 
             // Configuration de l'analyseur et du parser
             var analyzer = getAnalyzer(language);
@@ -53,7 +56,7 @@ public class RechercheLangue {
                 }
 
                 // Exécution de la recherche
-                searchDocuments(parser, queryText);
+                searchDocuments(parser, queryText, indexDir);
             }
         } catch (Exception e) {
             System.err.println("Erreur : " + e.getMessage());
@@ -113,10 +116,11 @@ public class RechercheLangue {
      *
      * @param parser    Le parser pour construire la requête
      * @param queryText Le texte de la recherche
+     * @param indexDir  Le dossier de l'index à interroger
      * @throws Exception En cas d'erreur lors de la recherche
      */
-    private static void searchDocuments(MultiFieldQueryParser parser, String queryText) throws Exception {
-        try (var indexReader = DirectoryReader.open(FSDirectory.open(Paths.get(INDEX_DIR)))) {
+    private static void searchDocuments(MultiFieldQueryParser parser, String queryText, String indexDir) throws Exception {
+        try (var indexReader = DirectoryReader.open(FSDirectory.open(Paths.get(indexDir)))) {
             var searcher = new IndexSearcher(indexReader);
             var query = parser.parse(queryText);
             var results = searcher.search(query, 4096);
@@ -129,7 +133,7 @@ public class RechercheLangue {
                     var id = doc.get(FIELD_ID);
                     var titre = doc.get(FIELD_TITRE);
                     var auteur = doc.get(FIELD_AUTEUR);
-                    System.out.println("ID: %s - Lucène ID: %d - Titre : %s - Auteur : %s"
+                    System.out.println("ID: %s - Lucene ID: %d - Titre : %s - Auteur : %s"
                             .formatted(id, hit.doc, titre, auteur));
                 } catch (Exception e) {
                     System.err.println("Erreur lors de l'affichage d'un document : " + e.getMessage());
